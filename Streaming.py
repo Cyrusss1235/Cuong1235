@@ -110,7 +110,7 @@ schema = StructType([
     StructField("AvgCAHH", FloatType(), True)
     # StructField("Year", StringType, True)
 ])
-spark = SparkSession.builder.appName("Câu 4").getOrCreate()
+spark = SparkSession.builder.appName("Streaming").getOrCreate()
 streaming_df = spark.readStream.schema(schema).option("header", "true") \
     .format("csv").option("path", "D:/Bigdata/Đề tài 8/cau4").load()
 result_df = streaming_df.withColumn("total_goals", col("FTHG") + col("FTAG")) \
