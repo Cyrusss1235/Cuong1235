@@ -1,0 +1,127 @@
+import pyspark
+from pyspark.sql.types import StructType, StructField, StringType,IntegerType,DateType,FloatType
+from pyspark.sql.functions import col
+from pyspark.streaming import StreamingContext
+from pyspark.sql import SparkSession
+schema = StructType([
+    StructField("Div", StringType(), True),
+    StructField("Date", StringType(), True),
+    StructField("Time", StringType(), True),
+    StructField("HomeTeam", StringType(), True),
+    StructField("AwayTeam", StringType(), True),
+    StructField("FTHG", IntegerType(), True),
+    StructField("FTAG", IntegerType(), True),
+    StructField("FTR", StringType(), True),
+    StructField("HTHG", IntegerType(), True),
+    StructField("HTAG", IntegerType(), True),
+    StructField("HTR",StringType(), True),
+    StructField("HS",IntegerType(), True),
+    StructField("AS",IntegerType(), True),
+    StructField("HST",IntegerType(), True),
+    StructField("AST",IntegerType(), True),
+    StructField("HF",IntegerType(), True),
+    StructField("AF",IntegerType(), True),
+    StructField("HC",IntegerType(), True),
+    StructField("AC",IntegerType(), True),
+    StructField("HY",IntegerType(), True),
+    StructField("AY",IntegerType(), True),
+    StructField("HR",IntegerType(), True),
+    StructField("AR",IntegerType(), True),
+    StructField("B365H", FloatType(), True),
+    StructField("B365D", FloatType(), True),
+    StructField("B365A", FloatType(), True),
+    StructField("BWH", FloatType(), True),
+    StructField("BWD", FloatType(), True),
+    StructField("BWA", FloatType(), True),
+    StructField("IWH", FloatType(), True),
+    StructField("IWD", FloatType(), True),
+    StructField("IWA", FloatType(), True),
+    StructField("PSH", FloatType(), True),
+    StructField("PSD", FloatType(), True),
+    StructField("PSA", FloatType(), True),
+    StructField("WHH", FloatType(), True),
+    StructField("WHD", FloatType(), True),
+    StructField("WHA", FloatType(), True),
+    StructField("VCH", FloatType(), True),
+    StructField("VCD", FloatType(), True),
+    StructField("VCA", FloatType(), True),
+    StructField("MaxH", FloatType(), True),
+    StructField("MaxD", FloatType(), True),
+    StructField("MaxA", FloatType(), True),
+    StructField("AvgH", FloatType(), True),
+    StructField("AvgD", FloatType(), True),
+    StructField("AvgA", FloatType(), True),
+    StructField("B365>2.5", FloatType(), True),
+    StructField("B365<2.5", FloatType(), True),
+    StructField("P>2.5", FloatType(), True),
+    StructField("P<2.5", FloatType(), True),
+    StructField("Max>2.5", FloatType(), True),
+    StructField("Max<2.5", FloatType(), True),
+    StructField("Avg>2.5", FloatType(), True),
+    StructField("Avg<2.5", FloatType(), True),
+    StructField("AHh", FloatType(), True),
+    StructField("B365AHH", FloatType(), True),
+    StructField("B365AHA", FloatType(), True),
+    StructField("PAHH", FloatType(), True),
+    StructField("PAHA", FloatType(), True),
+    StructField("MaxAHH", FloatType(), True),
+    StructField("MaxAHA", FloatType(), True),
+    StructField("AvgAHH", FloatType(), True),
+    StructField("AvgAHA", FloatType(), True),
+    StructField("B365CH", FloatType(), True),
+    StructField("B365CD", FloatType(), True),
+    StructField("B365CA", FloatType(), True),
+    StructField("BWCH", FloatType(), True),
+    StructField("BWCD", FloatType(), True),
+    StructField("BWCA", FloatType(), True),
+    StructField("IWCH", FloatType(), True),
+    StructField("IWCD", FloatType(), True),
+    StructField("IWCA", FloatType(), True),
+    StructField("PSCH", FloatType(), True),
+    StructField("PSCD", FloatType(), True),
+    StructField("PSCA", FloatType(), True),
+    StructField("WHCH", FloatType(), True),
+    StructField("WHCD", FloatType(), True),
+    StructField("WHCA", FloatType(), True),
+    StructField("VCCH", FloatType(), True),
+    StructField("VCCD", FloatType(), True),
+    StructField("VCCA", FloatType(), True),
+    StructField("MaxCH", FloatType(), True),
+    StructField("MaxCD", FloatType(), True),
+    StructField("MaxCA", FloatType(), True),
+    StructField("AvgCH", FloatType(), True),
+    StructField("AvgCD", FloatType(), True),
+    StructField("AvgCA", FloatType(), True),
+    StructField("B365C>2.5", FloatType(), True),
+    StructField("B365C<2.5", FloatType(), True),
+    StructField("PC>2.5", FloatType(), True),
+    StructField("PC<2.5", FloatType(), True),
+    StructField("MaxC>2.5", FloatType(), True),
+    StructField("MaxC<2.5", FloatType(), True),
+    StructField("AvgC>2.5", FloatType(), True),
+    StructField("AvgC<2.5", FloatType(), True),
+    StructField("AHCh", FloatType(), True),
+    StructField("B365CAHH", FloatType(), True),
+    StructField("B365CAHA", FloatType(), True),
+    StructField("PCAHH", FloatType(), True),
+    StructField("PCAHA", FloatType(), True),
+    StructField("MaxCAHH", FloatType(), True),
+    StructField("MaxCAHA", FloatType(), True),
+    StructField("AvgCAHH", FloatType(), True)
+    # StructField("Year", StringType, True)
+])
+spark = SparkSession.builder.appName("Câu 4").getOrCreate()
+streaming_df = spark.readStream.schema(schema).option("header", "true") \
+    .format("csv").option("path", "D:/Bigdata/Đề tài 8/cau4").load()
+result_df = streaming_df.withColumn("total_goals", col("FTHG") + col("FTAG")) \
+    .filter((col("FTHG") == col("HTHG")) & (col("FTAG") == col("HTAG"))) \
+     .select("Date", "HomeTeam", "AwayTeam", "FTHG", "FTAG", "HTHG", "HTAG")
+# Viết kết quả ra console
+query = result_df.writeStream \
+    .outputMode("append")\
+    .format("console").option("numRows",20) \
+    .start()
+
+# Chờ quá trình streaming hoàn thành
+query.awaitTermination()
+spark.stop()
